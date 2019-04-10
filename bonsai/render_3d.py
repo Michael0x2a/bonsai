@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+'''
 import math
 from solid import *
 from solid.utils import *
@@ -61,3 +62,4 @@ if __name__ == '__main__':
         'generated/bonsai.scad',
         include_orig_code=False,
     )
+'''
