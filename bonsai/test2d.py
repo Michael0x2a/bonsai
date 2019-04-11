@@ -50,12 +50,14 @@ def main() -> None:
     turtle.tracer(0)
     t = TurtleWrapper(0, -250, 90)
 
+    print("Fetching lsystem rules...")
+    lsystem = organic.weed_plant()
+
     print("Generating...")
-    #commands = traditional.koch_island(10).expand(t.clone())
-    commands = organic.weed_plant().expand(t.clone())
+    commands = lsystem.expand(t.clone(), available_energy=1000)
 
     print(f"Finished generating. Produced final instruction list of length {len(commands)}; now rendering...")
-    render_2d.draw_and_wait(t.clone(), commands)
+    render_2d.draw_and_wait(t.clone(), commands, render_rules=lsystem.render_rules)
 
 
 if __name__ == '__main__':

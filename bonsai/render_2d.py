@@ -1,16 +1,34 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Dict, Optional
 import turtle
 
-from bonsai.structures import Command, naive_interpret
-from bonsai.turtle_wrapper import TurtleWrapper
+from bonsai.structures import Command, Branch, BranchRenderer, BranchKind, interpret
+from bonsai.turtle_wrapper import TurtleWrapper, TurtleSnapshot
 
 
-def draw_and_wait(t: TurtleWrapper, commands: List[Command]) -> None:
+def draw_and_wait(t: TurtleWrapper,
+                  commands: List[Command],
+                  render_rules: Optional[Dict[BranchKind, BranchRenderer]] = None) -> None:
+    if render_rules is None:
+        render_rules = {}
+
+    renderer = t.clone()
+
+    def render(snapshot: TurtleSnapshot, branch: Branch) -> List[Command]:
+        renderer.restore(snapshot)
+        if branch.kind in render_rules:
+            render_rules[branch.kind](renderer, branch)
+        else:
+            renderer.pendown()
+            renderer.left(branch.angle)
+            renderer.forward(branch.length)
+            renderer.penup()
+        return [branch]
+
     turtle.tracer(0)
     t.pendown()
-    naive_interpret(t, commands)
+    interpret(t, commands, render)
     turtle.update()
     turtle.mainloop()
 

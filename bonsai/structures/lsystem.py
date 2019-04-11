@@ -9,6 +9,7 @@ from .interpreter import interpret
 
 
 BranchTransformer = Callable[['BranchSnapshot'], List[Command]]
+BranchRenderer = Callable[[TurtleWrapper, Branch], None]
 
 
 @dataclass
@@ -22,11 +23,15 @@ class BranchSnapshot:
 class LSystem:
     def __init__(self, seed: List[Command],
                        rules: Optional[Dict[BranchKind, BranchTransformer]] = None,
+                       render_rules: Optional[Dict[BranchKind, BranchRenderer]] = None,
                        recommended_depth: int = 3) -> None:
         self.seed = seed
         if rules is None:
             rules = {}
+        if render_rules is None:
+            render_rules = {}
         self.rules = rules
+        self.render_rules = render_rules
         self.recommended_depth = recommended_depth
 
     def add_rule(self, kind: BranchKind) -> Callable[[BranchTransformer], BranchTransformer]:
@@ -35,6 +40,14 @@ class LSystem:
                 raise Exception(f"Rule for kind {kind} already present")
             self.rules[kind] = transformer
             return transformer
+        return adder
+
+    def add_render_rule(self, kind: BranchKind) -> Callable[[BranchRenderer], BranchRenderer]:
+        def adder(renderer: BranchRenderer) -> BranchRenderer:
+            if kind in self.render_rules:
+                raise Exception(f"Render rule for kind {kind} already present")
+            self.render_rules[kind] = renderer
+            return renderer
         return adder
 
     def add_default_rule(self) -> Callable[[BranchTransformer], BranchTransformer]:
